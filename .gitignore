@@ -1,0 +1,38 @@
+# ==========================================
+# 1. ENTORNOS DE DESARROLLO E IDE
+# ==========================================
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# ==========================================
+# 2. FRONTEND (React / Node)
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# ==========================================
+# 3. BACKEND (Spring Boot / Maven)
+# ==========================================
+# Ignorar los compilados y ejecutables
+backend/target/
+backend/**/*.jar
+backend/**/*.war
+*.log
+
+# Ignorar las bases de datos locales H2 (¡Adiós a los errores de commits!)
+backend/**/data/
+*.mv.db
+*.trace.db
+
+# ==========================================
+# 4. SISTEMAS OPERATIVOS (Archivos ocultos)
+# ==========================================
+.DS_Store
+Thumbs.db
