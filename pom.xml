@@ -4,23 +4,84 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Datos de tu proyecto padre -->
+    <!-- Parent de Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <!-- Datos del proyecto raíz / contenedor -->
     <groupId>cl.duoc.colegio</groupId>
     <artifactId>backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-
-    <!-- ESTA ES LA PALABRA CLAVE QUE LE DICE A MAVEN QUE ES UNA CARPETA CONTENEDORA -->
     <packaging>pom</packaging>
 
     <name>colegio-backend</name>
     <description>Proyecto Multimódulo para el Colegio Bernardo O'Higgins</description>
 
-    <!-- Aquí listamos las carpetas de tus microservicios -->
+    <!-- Propiedades heredadas por todos los submódulos -->
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud-azure.version>5.23.0</spring-cloud-azure.version>
+    </properties>
+
+    <!-- Lista de microservicios / módulos -->
     <modules>
         <module>academic-service</module>
         <module>attendance-service</module>
         <module>communication-service</module>
         <module>bff-service</module>
     </modules>
+
+    <!-- Gestión de versiones de Azure para todos los módulos -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.azure.spring</groupId>
+                <artifactId>spring-cloud-azure-dependencies</artifactId>
+                <version>5.23.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Dependencias globales compartidas por todos los microservicios -->
+    <dependencies>
+        <!-- Requerido para controladores REST y endpoints HTTP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Resource Server para validar JWT -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Starter Microsoft Entra ID -->
+        <dependency>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-active-directory</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
