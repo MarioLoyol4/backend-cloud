@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -87,7 +89,26 @@ public class AuthAcademicController {
             ));
         }
 
-
         return ResponseEntity.status(401).body(Map.of(ERROR_KEY, ERROR_MSG_CREDENTIALS));
+    }
+    @GetMapping("/perfil")
+    public ResponseEntity<?> obtenerPerfilPorEmail(@RequestParam String email) {
+        var apoderado = apoderadoRepository.findByEmail(email);
+        if (apoderado.isPresent()) {
+            Apoderado a = apoderado.get();
+            List<Long> ids = a.getEstudiantes().stream().map(Estudiante::getId).toList();
+            return ResponseEntity.ok(Map.of("referenciaId", String.valueOf(a.getId()), "rol", "APODERADO", "estudiantesACargo", ids));
+        }
+        var estudiante = estudianteRepository.findByEmail(email);
+        if (estudiante.isPresent()) {
+            Estudiante e = estudiante.get();
+            return ResponseEntity.ok(Map.of("referenciaId", String.valueOf(e.getId()), "rol", "ESTUDIANTE", "estudiantesACargo", List.of()));
+        }
+        var docente = docenteRepository.findByEmail(email);
+        if (docente.isPresent()) {
+            Docente d = docente.get();
+            return ResponseEntity.ok(Map.of("referenciaId", String.valueOf(d.getId()), "rol", "DOCENTE", "estudiantesACargo", List.of()));
+        }
+        return ResponseEntity.status(404).body(Map.of(ERROR_KEY, "No existe un perfil académico asociado a ese email"));
     }
 }

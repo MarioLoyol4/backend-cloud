@@ -1,7 +1,7 @@
 package cl.duoc.colegio.bff.controller;
 
 import cl.duoc.colegio.bff.client.MicroservicioClient;
-import cl.duoc.colegio.bff.controller.DashboardController;
+import cl.duoc.colegio.bff.security.IdentidadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,13 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +27,16 @@ class DashboardControllerTest {
     private MicroservicioClient client;
 
     @Mock
-    private Authentication authentication;
+    private IdentidadService identidadService;
+
+    @Mock
+    private Jwt jwt;
 
     private DashboardController dashboardController;
 
     @BeforeEach
     void setUp() {
-        dashboardController = new DashboardController(client);
+        dashboardController = new DashboardController(client, identidadService);
 
         ReflectionTestUtils.setField(dashboardController, "academicUrl", "http://localhost:8081");
         ReflectionTestUtils.setField(dashboardController, "attendanceUrl", "http://localhost:8082");
@@ -47,12 +46,8 @@ class DashboardControllerTest {
     @Test
     @DisplayName("obtenerResumenEstudiante debe retornar datos para DOCENTE")
     void testObtenerResumenEstudianteDocente() {
-        // Arrange
         Long estudianteId = 1L;
-
-        // Usar doReturn en lugar de when para evitar problemas de genéricos con Collection
-        Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_DOCENTE"));
-        doReturn(authorities).when(authentication).getAuthorities();
+        when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("DOCENTE"));
 
         when(client.llamarSeguro("academic-service", "http://localhost:8081/api/notas/estudiante/1"))
                 .thenReturn(Map.of("notas", List.of()));
@@ -63,29 +58,24 @@ class DashboardControllerTest {
         when(client.llamarSeguro("communication-service", "http://localhost:8083/api/comunicados/destinatario/APODERADOS"))
                 .thenReturn(Map.of("comunicados", List.of()));
 
-        // Act
-        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, authentication);
+        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, jwt);
 
-        // Assert
         assertEquals(HttpStatus.OK, respuesta.getStatusCode());
         assertNotNull(respuesta.getBody());
         verify(client, times(4)).llamarSeguro(anyString(), anyString());
+        verify(identidadService, never()).resolverPerfil(any());
     }
 
     @Test
     @DisplayName("obtenerResumenEstudiante debe denegar acceso a APODERADO sin permiso")
     void testObtenerResumenEstudianteApoderadoSinAcceso() {
-        // Arrange
         Long estudianteId = 99L;
+        when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("APODERADO"));
+        when(identidadService.resolverPerfil(jwt))
+                .thenReturn(new IdentidadService.Perfil("10", "APODERADO", List.of(1L, 2L, 3L)));
 
-        Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_APODERADO"));
-        doReturn(authorities).when(authentication).getAuthorities();
-        when(authentication.getDetails()).thenReturn(List.of(1, 2, 3));
+        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, jwt);
 
-        // Act
-        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, authentication);
-
-        // Assert
         assertEquals(HttpStatus.FORBIDDEN, respuesta.getStatusCode());
         assertTrue(respuesta.getBody().toString().contains("error"));
         verify(client, never()).llamarSeguro(anyString(), anyString());
@@ -94,20 +84,16 @@ class DashboardControllerTest {
     @Test
     @DisplayName("obtenerResumenEstudiante debe permitir acceso a APODERADO con permiso")
     void testObtenerResumenEstudianteApoderadoConAcceso() {
-        // Arrange
         Long estudianteId = 1L;
-
-        Collection<? extends GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_APODERADO"));
-        doReturn(authorities).when(authentication).getAuthorities();
-        when(authentication.getDetails()).thenReturn(List.of(1, 2, 3));
+        when(jwt.getClaimAsStringList("roles")).thenReturn(List.of("APODERADO"));
+        when(identidadService.resolverPerfil(jwt))
+                .thenReturn(new IdentidadService.Perfil("10", "APODERADO", List.of(1L, 2L, 3L)));
 
         when(client.llamarSeguro(anyString(), anyString()))
                 .thenReturn(Map.of("datos", List.of()));
 
-        // Act
-        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, authentication);
+        ResponseEntity<?> respuesta = dashboardController.obtenerResumenEstudiante(estudianteId, jwt);
 
-        // Assert
         assertEquals(HttpStatus.OK, respuesta.getStatusCode());
         verify(client, times(4)).llamarSeguro(anyString(), anyString());
     }
@@ -115,17 +101,14 @@ class DashboardControllerTest {
     @Test
     @DisplayName("miPerfil debe retornar los datos del estudiante actual")
     void testMiPerfil() {
-        // Arrange
-        String estudianteId = "estudiante-1";
-        when(authentication.getPrincipal()).thenReturn(estudianteId);
+        when(identidadService.resolverPerfil(jwt))
+                .thenReturn(new IdentidadService.Perfil("estudiante-1", "ESTUDIANTE", List.of()));
 
         when(client.llamarSeguro(anyString(), anyString()))
                 .thenReturn(Map.of("datos", List.of()));
 
-        // Act
-        ResponseEntity<?> respuesta = dashboardController.miPerfil(authentication);
+        ResponseEntity<?> respuesta = dashboardController.miPerfil(jwt);
 
-        // Assert
         assertEquals(HttpStatus.OK, respuesta.getStatusCode());
         assertNotNull(respuesta.getBody());
         verify(client, times(3)).llamarSeguro(anyString(), anyString());
@@ -134,17 +117,13 @@ class DashboardControllerTest {
     @Test
     @DisplayName("resumenCurso debe retornar los datos del curso")
     void testResumenCurso() {
-        // Arrange
         Long cursoId = 1L;
 
-        // Solo dejamos el mock que realmente se ocupa
         when(client.llamarSeguro(anyString(), anyString()))
                 .thenReturn(Map.of("datos", List.of()));
 
-        // Act
-        ResponseEntity<?> respuesta = dashboardController.resumenCurso(cursoId, authentication);
+        ResponseEntity<?> respuesta = dashboardController.resumenCurso(cursoId);
 
-        // Assert
         assertEquals(HttpStatus.OK, respuesta.getStatusCode());
         assertNotNull(respuesta.getBody());
         verify(client, times(2)).llamarSeguro(anyString(), anyString());
@@ -189,22 +168,22 @@ class DashboardControllerTest {
         verify(client, times(1)).llamarConCircuitBreaker(eq("communication-service"), eq("http://localhost:8083/api/comunicados"), any());
     }
 
-        @Test
-        @DisplayName("crearEvaluacion debe reenviar la petición al microservicio académico")
-        void testCrearEvaluacion() {
-                Map<String, Object> payload = Map.of(
-                                "nombre", "Prueba de Historia",
-                                "fecha", "2026-07-20",
-                                "asignatura", Map.of("id", 2L)
-                );
-                when(client.llamarConCircuitBreaker(eq("academic-service"), eq("http://localhost:8081/api/evaluaciones"), any()))
-                                .thenReturn(Map.of("id", 7));
+    @Test
+    @DisplayName("crearEvaluacion debe reenviar la petición al microservicio académico")
+    void testCrearEvaluacion() {
+        Map<String, Object> payload = Map.of(
+                "nombre", "Prueba de Historia",
+                "fecha", "2026-07-20",
+                "asignatura", Map.of("id", 2L)
+        );
+        when(client.llamarConCircuitBreaker(eq("academic-service"), eq("http://localhost:8081/api/evaluaciones"), any()))
+                .thenReturn(Map.of("id", 7));
 
-                ResponseEntity<?> respuesta = dashboardController.crearEvaluacion(payload);
+        ResponseEntity<?> respuesta = dashboardController.crearEvaluacion(payload);
 
-                assertEquals(HttpStatus.OK, respuesta.getStatusCode());
-                verify(client, times(1)).llamarConCircuitBreaker(eq("academic-service"), eq("http://localhost:8081/api/evaluaciones"), any());
-        }
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+        verify(client, times(1)).llamarConCircuitBreaker(eq("academic-service"), eq("http://localhost:8081/api/evaluaciones"), any());
+    }
 
     @Test
     @DisplayName("registrarNota debe reenviar la petición al microservicio académico")

@@ -1,10 +1,12 @@
 package cl.duoc.colegio.bff.controller;
 
 import cl.duoc.colegio.bff.client.MicroservicioClient;
+import cl.duoc.colegio.bff.security.IdentidadService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,7 @@ public class DashboardController {
 
 
     private final MicroservicioClient client;
+    private final IdentidadService identidadService;
 
     @Value("${services.academic.url}")
     private String academicUrl;
@@ -41,15 +44,15 @@ public class DashboardController {
 
 
     @GetMapping("/estudiante/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'APODERADO')")
+    @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE', 'APPROLE_APODERADO')")
     public ResponseEntity<?> obtenerResumenEstudiante(
             @PathVariable Long id,
-            Authentication auth) {
-        String rol = auth.getAuthorities().iterator().next().getAuthority();
+            @AuthenticationPrincipal Jwt jwt) {
+        List<String> roles = jwt.getClaimAsStringList("roles");
+        boolean esApoderado = roles != null && roles.contains("APODERADO");
 
-        if (rol.equals("ROLE_APODERADO")) {
-            @SuppressWarnings("unchecked")
-            List<Integer> estudiantesACargo = (List<Integer>) auth.getDetails();
+        if (esApoderado) {
+            List<Long> estudiantesACargo = identidadService.resolverPerfil(jwt).estudiantesACargo();
             boolean tieneAcceso = estudiantesACargo.stream()
                     .anyMatch(eId -> eId.longValue() == id);
 
@@ -73,9 +76,9 @@ public class DashboardController {
     }
 
     @GetMapping("/miperfil")
-    @PreAuthorize("hasRole('ESTUDIANTE')")
-    public ResponseEntity<?> miPerfil(Authentication auth) {
-        String estudianteId = (String) auth.getPrincipal();
+    @PreAuthorize("hasAuthority('APPROLE_ESTUDIANTE')")
+    public ResponseEntity<?> miPerfil(@AuthenticationPrincipal Jwt jwt) {
+        String estudianteId = identidadService.resolverPerfil(jwt).referenciaId();
 
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("notas",
@@ -89,10 +92,8 @@ public class DashboardController {
     }
 
     @GetMapping("/curso/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
-    public ResponseEntity<?> resumenCurso(
-            @PathVariable Long id,
-            Authentication authentication) {
+    @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
+    public ResponseEntity<?> resumenCurso(@PathVariable Long id) {
         Map<String, Object> respuesta = new HashMap<>();
 
         respuesta.put("estudiantes",
