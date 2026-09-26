@@ -3,23 +3,28 @@ services:
   academic-service:
     build: ./academic-service
     restart: always
-    # No exponemos puertos al exterior, queda aislado en la red interna de Docker
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
 
   attendance-service:
     build: ./attendance-service
     restart: always
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
 
   communication-service:
     build: ./communication-service
     restart: always
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
 
   bff-service:
     build: ./bff-service
     restart: always
     ports:
-      - "9090:9090" # Solo el BFF es accesible desde la IP de la EC2
+      - "9090:9090"
     environment:
-      # Sobreescribimos el application.properties para usar la red interna de Docker
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
       - services.academic.url=http://academic-service:8081
       - services.attendance.url=http://attendance-service:8082
       - services.communication.url=http://communication-service:8083
