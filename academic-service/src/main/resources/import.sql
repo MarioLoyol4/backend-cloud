@@ -10,7 +10,7 @@ INSERT INTO asignaturas (id, nombre) VALUES (3, 'Historia y Geografía');
 ALTER TABLE asignaturas ALTER COLUMN id RESTART WITH 4;
 
 -- 3. CREAR DOCENTES (Contraseña encriptada para: 123456)
-INSERT INTO docentes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, telefono, password) VALUES (1, '11111111-1', 'Roberto', 'Carlos', 'Gómez', 'Tapia', 'roberto@colegio.cl', '+56911111111', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO');
+INSERT INTO docentes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, telefono, password) VALUES (1, '11111111-1', 'Roberto', 'Carlos', 'Gómez', 'Tapia', 'docente.prueba@actividadclase.onmicrosoft.com', '+56911111111', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO');
 INSERT INTO docentes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, telefono, password) VALUES (2, '22222222-2', 'Camila', 'Andrea', 'Soto', 'Díaz', 'camila@colegio.cl', '+56922222222', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO');
 ALTER TABLE docentes ALTER COLUMN id RESTART WITH 3;
 
@@ -20,12 +20,12 @@ INSERT INTO docente_asignatura (docente_id, asignatura_id) VALUES (1, 2);
 INSERT INTO docente_asignatura (docente_id, asignatura_id) VALUES (2, 3);
 
 -- 4. CREAR ESTUDIANTES (Contraseña encriptada para: 123456)
-INSERT INTO estudiantes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, password, curso_id) VALUES (1, '33333333-3', 'Martina', 'Ignacia', 'Pérez', 'López', 'martina@alumno.cl', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO', 1);
+INSERT INTO estudiantes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, password, curso_id) VALUES (1, '33333333-3', 'Martina', 'Ignacia', 'Pérez', 'López', 'estudiante.prueba@actividadclase.onmicrosoft.com', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO', 1);
 INSERT INTO estudiantes (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, password, curso_id) VALUES (2, '44444444-4', 'Lucas', 'Mateo', 'Rojas', 'Silva', 'lucas@alumno.cl', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO', 1);
 ALTER TABLE estudiantes ALTER COLUMN id RESTART WITH 3;
 
 -- 5. CREAR APODERADOS (Contraseña encriptada para: 123456)
-INSERT INTO apoderados (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, telefono, password) VALUES (1, '55555555-5', 'Carolina', 'Paz', 'López', 'Muñoz', 'carolina@apoderado.cl', '+56955555555', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO');
+INSERT INTO apoderados (id, rut, nombre, segundo_nombre, apellido, segundo_apellido, email, telefono, password) VALUES (1, '55555555-5', 'Carolina', 'Paz', 'López', 'Muñoz', 'apoderado.prueba@actividadclase.onmicrosoft.com', '+56955555555', '$2a$10$ss9kwE8iSIqcJOAPhZR0Y.2XdYXJTFJ1/wGq6SUv74vULE7uhKUIO');
 ALTER TABLE apoderados ALTER COLUMN id RESTART WITH 2;
 
 -- Relación Apoderado-Estudiante

@@ -105,19 +105,19 @@ public class DashboardController {
     }
 
         @GetMapping("/asignaturas")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> listarAsignaturas() {
                 return ResponseEntity.ok(client.llamarSeguro("academic-service", academicUrl + "/api/asignaturas"));
         }
 
         @GetMapping("/evaluaciones")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> listarEvaluaciones() {
                 return ResponseEntity.ok(client.llamarSeguro("academic-service", academicUrl + "/api/evaluaciones"));
         }
 
         @PostMapping("/asistencias")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> registrarAsistencia(@RequestBody Map<String, Object> asistencia) {
                 try {
                         Object respuesta = client.llamarConCircuitBreaker(
@@ -132,7 +132,7 @@ public class DashboardController {
         }
 
         @PostMapping("/anotaciones")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> registrarAnotacion(@RequestBody Map<String, Object> anotacion) {
                 try {
                         Object respuesta = client.llamarConCircuitBreaker(
@@ -147,7 +147,7 @@ public class DashboardController {
         }
 
         @PostMapping("/comunicados")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> publicarComunicado(@RequestBody Map<String, Object> comunicado) {
                 try {
                         Object respuesta = client.llamarConCircuitBreaker(
@@ -162,7 +162,7 @@ public class DashboardController {
         }
 
         @PostMapping("/evaluaciones")
-        @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+        @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
         public ResponseEntity<?> crearEvaluacion(@RequestBody Map<String, Object> evaluacion) {
                 try {
                         Object respuesta = client.llamarConCircuitBreaker(
@@ -177,7 +177,7 @@ public class DashboardController {
         }
 
             @PostMapping("/notas")
-            @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
+            @PreAuthorize("hasAnyAuthority('APPROLE_ADMIN', 'APPROLE_DOCENTE')")
             public ResponseEntity<?> registrarNota(@RequestBody Map<String, Object> nota) {
                     try {
                             Object respuesta = client.llamarConCircuitBreaker(

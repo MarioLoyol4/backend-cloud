@@ -23,7 +23,17 @@ public class IdentidadService {
 
     public String extraerEmail(Jwt jwt) {
         String email = jwt.getClaimAsString("email");
-        return (email != null && !email.isBlank()) ? email : jwt.getClaimAsString("preferred_username");
+        if (email != null && !email.isBlank()) return email;
+
+        String preferredUsername = jwt.getClaimAsString("preferred_username");
+        if (preferredUsername != null && !preferredUsername.isBlank()) return preferredUsername;
+
+        // Tokens v1.0 (emitidos por sts.windows.net) no traen email/preferred_username,
+        // pero sí upn y unique_name con el mismo valor (el UPN del usuario en Entra ID).
+        String upn = jwt.getClaimAsString("upn");
+        if (upn != null && !upn.isBlank()) return upn;
+
+        return jwt.getClaimAsString("unique_name");
     }
 
     @SuppressWarnings("unchecked")
