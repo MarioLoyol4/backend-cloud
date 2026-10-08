@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/log").permitAll()
                         .requestMatchers("/api/bff/perfil").authenticated()
                         .requestMatchers("/api/bff/dashboard/asistencias/**").hasAnyAuthority("APPROLE_DOCENTE", "APPROLE_ADMIN")
                         .requestMatchers("/api/bff/dashboard/**").hasAnyAuthority("APPROLE_ADMIN", "APPROLE_DOCENTE", "APPROLE_APODERADO", "APPROLE_ESTUDIANTE")
