@@ -33,6 +33,7 @@
         <module>attendance-service</module>
         <module>communication-service</module>
         <module>bff-service</module>
+        <module>admin-service</module>
     </modules>
 
     <!-- Gestión de versiones de Azure para todos los módulos -->

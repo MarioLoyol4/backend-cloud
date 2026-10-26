@@ -1,0 +1,39 @@
+spring:
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASS:guest}
+    virtual-host: ${RABBIT_VHOST:/}
+    ssl:
+      enabled: ${RABBIT_SSL:false}
+    listener:
+      simple:
+        acknowledge-mode: manual # CRÍTICO: Para usar ACK manual
+        prefetch: 1
+        default-queue-rejected: false # Evita que Spring haga retry automático
+
+
+app:
+  messaging:
+    exchanges:
+      eventos: colegio.eventos
+      documentos: colegio.documentos
+      retry: colegio.retry
+      dlx: colegio.dlx
+    queues:
+      nota:
+        name: notificaciones.nota.queue
+        routing-key: nota.registrada
+      asistencia:
+        name: notificaciones.asistencia.queue
+        routing-key: asistencia.ausente
+      boletin-solicitado:
+        name: documentos.boletin.queue
+        routing-key: boletin.solicitado
+      boletin-generado:
+        name: notificaciones.boletin.queue
+        routing-key: boletin.generado
+    suffix:
+      retry: .retry
+      dlq: .dlq
