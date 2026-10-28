@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties(MessagingProperties.class)
-public class RabbitConfig {
+public class RabbitConfig  {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
