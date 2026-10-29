@@ -1,5 +1,6 @@
 package cl.duoc.colegio.attendance.controller;
 
+import cl.duoc.colegio.attendance.messaging.producer.AsistenciaEventPublisher;
 import cl.duoc.colegio.attendance.model.Asistencia;
 import cl.duoc.colegio.attendance.repository.AsistenciaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,14 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -23,14 +19,18 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AsistenciaControllerTest {
+
     @Mock
     private AsistenciaRepository asistenciaRepository;
+
+    @Mock
+    private AsistenciaEventPublisher eventPublisher;
 
     private AsistenciaController asistenciaController;
 
     @BeforeEach
     void setUp() {
-        asistenciaController = new AsistenciaController(asistenciaRepository);
+        asistenciaController = new AsistenciaController(asistenciaRepository, eventPublisher);
     }
 
     @Test
@@ -58,6 +58,7 @@ class AsistenciaControllerTest {
         assertEquals(1L, resultado.getId());
         assertEquals("PRESENTE", resultado.getEstado());
         verify(asistenciaRepository, times(1)).save(asistenciaNueva);
+        verify(eventPublisher, times(1)).asistenciaRegistrada(asistenciaGuardada);
     }
 
     @Test
@@ -129,6 +130,6 @@ class AsistenciaControllerTest {
         assertNotNull(resultado);
         assertEquals("AUSENTE", resultado.getEstado());
         verify(asistenciaRepository, times(1)).save(asistenciaNueva);
+        verify(eventPublisher, times(1)).asistenciaRegistrada(asistenciaGuardada);
     }
 }
-
