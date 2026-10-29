@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api/bff/rabbit")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('APPROLE_ADMIN')")
 @RequiredArgsConstructor
 public class BffRabbitAdminController {
 
