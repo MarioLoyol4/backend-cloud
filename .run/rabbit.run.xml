@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="rabbit" type="Application" factoryName="Application">
+    <envs>
+      <env name="RABBIT_HOST" value="100.59.189.107" />
+      <env name="RABBIT_PORT" value="5672" />
+      <env name="RABBIT_USER" value="colegio" />
+      <env name="RABBIT_PASS" value="password" />
+      <env name="RABBIT_SSL" value="false" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="cl.duoc.rabbitadmin.RabbitAdminServiceApplication" />
+    <module name="rabbit-admin-service" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
