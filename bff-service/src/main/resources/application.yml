@@ -1,0 +1,7 @@
+services:
+  rabbit-admin:
+    url: ${RABBIT_ADMIN_SERVICE_URL:http://localhost:8084}
+
+internal:
+  api:
+    key: ${INTERNAL_API_KEY:secret-key-colegio}

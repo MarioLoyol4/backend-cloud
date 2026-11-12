@@ -1,0 +1,32 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: communication-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+app:
+  messaging:
+    exchanges:
+      eventos: amq.topic
+      documentos: documentos.exchange
+      retry: retry.exchange
+      dlx: dlx.exchange
+    queues:
+      boletin-generado:
+        name: q.boletin.generado
+        routing-key: boletin.generado
+      nota:
+        name: q.nota.registrada
+        routing-key: nota.registrada
+    suffix:
+      retry: .retry
+      dlq: .dlq
+    retry:
+      max-attempts: 3
+      delay-ms: 5000
