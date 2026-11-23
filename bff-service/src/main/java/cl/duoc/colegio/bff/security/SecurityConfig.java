@@ -7,9 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,12 +18,6 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final LocalAdminAuthenticationFilter localAdminAuthenticationFilter;
-
-    public SecurityConfig(LocalAdminAuthenticationFilter localAdminAuthenticationFilter) {
-        this.localAdminAuthenticationFilter = localAdminAuthenticationFilter;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -33,35 +25,27 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/bff/rabbit/**").hasAuthority("APPROLE_ADMIN")
+                        .requestMatchers("/api/bff/rabbit/**", "/api/bff/kafka/**").hasAuthority("APPROLE_ADMIN")
                         .requestMatchers("/api/bff/perfil").authenticated()
                         .requestMatchers("/api/bff/dashboard/asistencias/**").hasAnyAuthority("APPROLE_DOCENTE", "APPROLE_ADMIN")
                         .requestMatchers("/api/bff/dashboard/**").hasAnyAuthority("APPROLE_ADMIN", "APPROLE_DOCENTE", "APPROLE_APODERADO", "APPROLE_ESTUDIANTE")
                         .anyRequest().authenticated()
                 )
-
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .bearerTokenResolver(request -> {
-                            if ("admin-local-token".equals(request.getHeader("X-Local-Admin"))) {
-                                return null;
-                            }
-                            return new DefaultBearerTokenResolver().resolve(request);
-                        })
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
-
-        http.addFilterBefore(localAdminAuthenticationFilter, BearerTokenAuthenticationFilter.class);
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                );
         return http.build();
     }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-        grantedAuthoritiesConverter.setAuthorityPrefix("APPROLE_");
+        JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
+        authorities.setAuthoritiesClaimName("roles");
+        authorities.setAuthorityPrefix("APPROLE_");
 
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authorities);
+        return converter;
     }
 
     @Bean

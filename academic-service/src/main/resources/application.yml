@@ -33,6 +33,9 @@ app:
       boletin-generado:
         name: notificaciones.boletin.queue
         routing-key: boletin.generado
+      evaluacion:
+        name: notificaciones.evaluacion.queue
+        routing-key: evaluacion.creada
     suffix:
       retry: .retry
       dlq: .dlq

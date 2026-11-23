@@ -5,25 +5,31 @@ spring:
   application:
     name: communication-service
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASS:guest}
 
 app:
   messaging:
     exchanges:
-      eventos: amq.topic
-      documentos: documentos.exchange
-      retry: retry.exchange
-      dlx: dlx.exchange
+      eventos: colegio.eventos
+      documentos: colegio.documentos
+      retry: colegio.retry
+      dlx: colegio.dlx
     queues:
       boletin-generado:
-        name: q.boletin.generado
+        name: notificaciones.boletin.queue
         routing-key: boletin.generado
       nota:
-        name: q.nota.registrada
+        name: notificaciones.nota.queue
         routing-key: nota.registrada
+      asistencia:
+        name: notificaciones.asistencia.queue
+        routing-key: asistencia.ausente
+      evaluacion:
+        name: notificaciones.evaluacion.queue
+        routing-key: evaluacion.creada
     suffix:
       retry: .retry
       dlq: .dlq

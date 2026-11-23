@@ -10,7 +10,7 @@ public record MessagingProperties(
         Retry retry
 ) {
     public record Exchanges(String eventos, String documentos, String retry, String dlx) {}
-    public record Queues(QueueConfig boletinGenerado, QueueConfig nota) {}
+    public record Queues(QueueConfig boletinGenerado, QueueConfig nota, QueueConfig asistencia, QueueConfig evaluacion) {}
     public record QueueConfig(String name, String routingKey) {}
     public record Suffix(String retry, String dlq) {}
     public record Retry(int maxAttempts, long delayMs) {}

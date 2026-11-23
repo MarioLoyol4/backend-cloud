@@ -6,6 +6,7 @@ import cl.duoc.colegio.academic.model.Nota;
 import cl.duoc.colegio.academic.repository.EstudianteRepository;
 import cl.duoc.colegio.academic.repository.EvaluacionRepository;
 import cl.duoc.colegio.academic.repository.NotaRepository;
+import cl.duoc.colegio.academic.service.NotaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +22,7 @@ public class NotaController {
     private final NotaRepository notaRepository;
     private final EstudianteRepository estudianteRepository;
     private final EvaluacionRepository evaluacionRepository;
+    private final NotaService notaService;
 
     @GetMapping
     public List<Nota> listarTodas() {
@@ -44,7 +46,7 @@ public class NotaController {
 
         nota.setEstudiante(estudiante);
         nota.setEvaluacion(evaluacion);
-        return notaRepository.save(nota);
+        return notaService.registrarNota(nota);
     }
 
     @GetMapping("/estudiante/{id}")
